@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blackaud - Audio Converter</title>
+</head>
+<body>
+  <h1>Blackaud - Audio Converter</h1>
+
+  <div id="file-upload">
+    <label for="audio-file">Select Audio File:</label>
+    <input type="file" id="audio-file" accept="audio/*">
+  </div>
+
+  <div id="conversion-options">
+    <label for="output-format">Convert To:</label>
+    <select id="output-format">
+      <option value="mp3">MP3</option>
+      <option value="wav">WAV</option>
+      </select>
+  </div>
+
+  <button id="convert-button">Convert</button>
+
+  <p id="conversion-message"></p>
+
+  <script src="script.js"></script>
+</body>
+</html>

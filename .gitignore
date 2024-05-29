@@ -1,0 +1,27 @@
+# Node.js files
+node_modules/
+.env
+
+# Build and temporary directories
+build/
+dist/
+coverage/
+
+# Testing frameworks (adjust based on your needs)
+jest/
+
+# Editor temporary/cache files
+.vscode/
+.idea/
+npm-debug.log*
+yarn.lock
+
+# Logs
+*.log
+
+# Audio uploads (adjust if needed)
+uploads/
+
+# Dependency lock files (choose one)
+package-lock.json
+yarn.lock

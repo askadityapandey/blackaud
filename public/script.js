@@ -7,37 +7,30 @@ convertButton.addEventListener('click', async () => {
   conversionMessage.textContent = 'Conversion in progress...';
 
   try {
+    const formData = new FormData();
+    const audioFile = document.getElementById('audio-file').files[0];
+    if (audioFile) {
+      formData.append('audioFile', audioFile); // Add the selected file to FormData
+    } else {
+      conversionMessage.textContent = 'Please select an audio file.';
+      return; // Exit if no file selected
+    }
+
     const response = await fetch('http://localhost:3000/convert', {
       method: 'POST',
-      body: new FormData(), // FormData for file upload
+      body: formData,
     });
 
-    const data = await response.json();
-
-    if (data.message === 'Conversion successful!') {
-      conversionMessage.textContent = 'Conversion complete!';
-      // Create a download link (optional)
-      const downloadLink = document.createElement('a');
-      downloadLink.href = `http://localhost:3000/uploads/${data.convertedFile}`; // Update path if needed
-      downloadLink.download = data.convertedFile;
-      downloadLink.textContent = 'Download Converted File';
-      // (Optional) Add the download link to the DOM
+    if (response.ok) {
+      const data = await response.json(); // Parse JSON only on successful response
+      conversionMessage.textContent = data.message; // Display message from server
+      // (Optional) Handle successful conversion (download link, etc.)
     } else {
-      conversionMessage.textContent = data.message; // Handle error message
+      const message = await response.text(); // Get error message as text
+      conversionMessage.textContent = message; // Display error message from server
     }
   } catch (error) {
     console.error('Error:', error);
     conversionMessage.textContent = 'Conversion failed!';
-  }
-});
-
-
-// Handle file selection and display filename
-audioFile.addEventListener('change', (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    conversionMessage.textContent = `Selected file: ${file.name}`;
-  } else {
-    conversionMessage.textContent = 'No file selected.';
   }
 });

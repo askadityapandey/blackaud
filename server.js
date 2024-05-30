@@ -1,13 +1,13 @@
 const express = require('express');
-const ffmpeg = require('ffmpeg.js');
-const path = require('path'); // for handling file paths
+const ffmpeg = require('fluent-ffmpeg');
+const path = require('path');
 const multer = require('multer');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Configure multer for file uploads (consider security implications)
-const upload = multer({ dest: 'uploads/' }); // Configure upload destination
+// Configure multer for file uploads
+const upload = multer({ dest: 'uploads/' });
 
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
@@ -17,30 +17,23 @@ app.post('/convert', upload.single('audioFile'), (req, res) => {
     return res.status(400).send('No file uploaded!');
   }
 
-  const fileName = req.file.originalname;
-  const filePath = path.join(__dirname, 'uploads', fileName); // Absolute path
+  const inputPath = req.file.path;
+  const outputFormat = 'mp3'; // or retrieve this from a query parameter or form data
+  const outputPath = path.join(__dirname, 'uploads', `converted_${req.file.filename}.${outputFormat}`);
 
-  const command = ffmpeg(filePath)
-    .output(path.join(__dirname, 'uploads', `converted_${fileName}`))
-    .audioCodec('libmp3lame');
-
-  command.on('end', () => {
-    console.log('Conversion completed!');
-
-    const convertedFile = path.join(__dirname, 'uploads', `converted_${fileName}`);
-
-    // Set headers for download
-    res.setHeader('Content-Type', 'audio/mpeg'); // Set audio/mpeg for MP3
-    res.setHeader('Content-Disposition', `attachment; filename="${convertedFile}"`);
-    res.sendFile(convertedFile); // Send the converted audio file
-  });
-
-  command.on('error', (err) => {
-    console.error('Conversion error:', err);
-    res.status(500).send({ message: 'Conversion failed!' });
-  });
-
-  command.run();
+  ffmpeg(inputPath)
+    .toFormat(outputFormat)
+    .on('end', () => {
+      console.log('Conversion completed!');
+      res.setHeader('Content-Type', 'audio/mpeg'); // Set audio/mpeg for MP3
+      res.setHeader('Content-Disposition', `attachment; filename="converted_${req.file.filename}.${outputFormat}"`);
+      res.sendFile(outputPath);
+    })
+    .on('error', (err) => {
+      console.error('Conversion error:', err);
+      res.status(500).send({ message: 'Conversion failed!' });
+    })
+    .save(outputPath);
 });
 
 app.listen(port, () => {

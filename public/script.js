@@ -24,7 +24,16 @@ convertButton.addEventListener('click', async () => {
     if (response.ok) {
       const data = await response.json(); // Parse JSON only on successful response
       conversionMessage.textContent = data.message; // Display message from server
-      // (Optional) Handle successful conversion (download link, etc.)
+      
+      // Create a download link for the converted file
+      const downloadLink = document.createElement('a');
+      downloadLink.href = data.url;
+      downloadLink.textContent = 'Download Converted File';
+      downloadLink.download = ''; // Optionally set the download attribute
+      
+      // Append the link to the message element
+      conversionMessage.appendChild(document.createElement('br')); // Line break
+      conversionMessage.appendChild(downloadLink);
     } else {
       const message = await response.text(); // Get error message as text
       conversionMessage.textContent = message; // Display error message from server

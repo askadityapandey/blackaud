@@ -2,6 +2,7 @@ const express = require('express');
 const ffmpeg = require('fluent-ffmpeg');
 const path = require('path');
 const multer = require('multer');
+const fs = require('fs');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -19,15 +20,14 @@ app.post('/convert', upload.single('audioFile'), (req, res) => {
 
   const inputPath = req.file.path;
   const outputFormat = 'mp3'; // or retrieve this from a query parameter or form data
-  const outputPath = path.join(__dirname, 'uploads', `converted_${req.file.filename}.${outputFormat}`);
+  const outputFileName = `converted_${req.file.filename}.${outputFormat}`;
+  const outputPath = path.join(__dirname, 'uploads', outputFileName);
 
   ffmpeg(inputPath)
     .toFormat(outputFormat)
     .on('end', () => {
       console.log('Conversion completed!');
-      res.setHeader('Content-Type', 'audio/mpeg'); // Set audio/mpeg for MP3
-      res.setHeader('Content-Disposition', `attachment; filename="converted_${req.file.filename}.${outputFormat}"`);
-      res.sendFile(outputPath);
+      res.json({ message: 'Conversion completed!', url: `/uploads/${outputFileName}` });
     })
     .on('error', (err) => {
       console.error('Conversion error:', err);
@@ -35,6 +35,9 @@ app.post('/convert', upload.single('audioFile'), (req, res) => {
     })
     .save(outputPath);
 });
+
+// Serve the uploads directory to make files accessible
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
